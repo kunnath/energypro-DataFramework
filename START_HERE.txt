@@ -50,7 +50,7 @@
 📊 QUICK COMMANDS
 
   # Health check (verify connection)
-  export MONGODB_URI="mongodb+srv://aikunnath_db_user:demo123@cluster0.zrzxfpd.mongodb.net/sample_mflix"
+  export MONGODB_URI="mongodb+srv://demo_db_user:demotest@cluster0.zrzxfpd.mongodb.net/sample_mflix"
   python test-data-automation/ista_mongo_cli.py health
 
   # Show collection status
@@ -100,7 +100,7 @@
 
   Cluster:    cluster0.zrzxfpd.mongodb.net (MongoDB Atlas)
   Database:   sample_mflix
-  User:       aikunnath_db_user
+  User:       demo_db_user
   Collections: 6 (movies, users, comments, sessions, theaters, embedded_movies)
   
   Status: ✅ CONNECTED & VERIFIED
