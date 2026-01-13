@@ -280,7 +280,7 @@ python test-data-automation/ista_mongo_cli.py status
 - **Framework Issues**: Raise PR in `ista-framework` repo
 - **Data Automation Q&A**: Slack #ista-data-automation
 - **Environment Automation Q&A**: Slack #ista-environment-automation
-- **Governance/Compliance**: Email security-automation@company.com
+- **Governance/Compliance**: Email sreelesh.kunnath@dinexora.de
 
 ---
 

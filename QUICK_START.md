@@ -431,7 +431,7 @@ terraform plan -var pipeline_id=test-123
 ## 📞 Getting Help
 
 **Slack**: #ista-framework  
-**Email**: qa-automation@company.com  
+**Email**: sreelesh.kunnath@dinexora.de  
 **Issues**: github.com/company/ista-framework/issues  
 **Wiki**: https://wiki.company.com/ista  
 
