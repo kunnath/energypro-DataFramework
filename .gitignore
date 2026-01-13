@@ -115,3 +115,10 @@ node_modules/
 config.local.yaml
 config.local.json
 settings.local.py
+
+# Markdown Documentation (except README.md and QUICK_START.md)
+# These are kept locally but not tracked in git for cleaner repository
+*.md
+!README.md
+!QUICK_START.md
+
