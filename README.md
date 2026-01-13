@@ -225,19 +225,26 @@ Status: ✅ Ready
 
 ### 5-Minute Quick Start
 ```bash
-# 1. Set environment
-export MONGODB_URI="mongodb+srv://aikunnath_db_user:demo123@cluster0.zrzxfpd.mongodb.net/sample_mflix"
+# 1. Clone repository and set up environment
+git clone https://github.com/kunnath/energypro-DataFramework.git
+cd energypro-DataFramework
+cp .env.example .env
 
-# 2. Install dependencies
-pip install pymongo faker rich click pyyaml
+# 2. Add your MongoDB credentials to .env
+# Edit .env and set MONGODB_URI to your MongoDB Atlas connection string
+nano .env
 
-# 3. Verify connection
+# 3. Load environment and install dependencies
+source .env
+pip install -r requirements.txt
+
+# 4. Verify connection
 python test-data-automation/ista_mongo_cli.py health
 
-# 4. Provision test data
+# 5. Provision test data
 python test-data-automation/ista_mongo_cli.py provision -d movies -d users
 
-# 5. Check status
+# 6. Check status
 python test-data-automation/ista_mongo_cli.py status
 ```
 

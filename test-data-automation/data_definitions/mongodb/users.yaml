@@ -1,0 +1,254 @@
+apiVersion: data.automation/v1
+kind: MongoDataDefinition
+metadata:
+  name: users
+  database: sample_mflix
+  version: v1.0.0
+  description: |
+    User documents for sample_mflix database.
+    Represents registered users with profiles, preferences, and watch history.
+
+spec:
+  adapter: mongodb
+  collection: users
+  
+  volume:
+    count: 50
+    description: "Generate 50 test users"
+  
+  fields:
+    - name: _id
+      type: objectid
+      generator: objectid
+      description: "MongoDB document ID"
+    
+    - name: username
+      type: string
+      generator: username
+      unique: true
+      required: true
+      example: "john_doe_123"
+      description: "Unique username"
+    
+    - name: email
+      type: string
+      generator: email
+      unique: true
+      required: true
+      masking: true
+      masking_type: email
+      example: "john.doe@example.com"
+      description: "User email address (PII - masked in test data)"
+    
+    - name: password_hash
+      type: string
+      generator: password_hash
+      sensitive: true
+      description: "Hashed password (never plaintext)"
+    
+    - name: profile
+      type: object
+      required: true
+      description: "User profile information"
+      fields:
+        - name: name
+          type: string
+          generator: name
+          required: true
+          example: "John Doe"
+          description: "Full name"
+        
+        - name: bio
+          type: string
+          generator: text
+          length: 100
+          description: "User bio/description"
+        
+        - name: avatar_url
+          type: string
+          generator: url
+          description: "Avatar image URL"
+        
+        - name: created_at
+          type: date
+          generator: date_between
+          start_date: "2020-01-01"
+          end_date: "2024-12-31"
+          required: true
+          description: "Account creation date"
+    
+    - name: favorite_movies
+      type: array
+      element_type: objectid
+      cardinality: 5
+      reference_collection: movies
+      description: "References to favorite movie documents"
+    
+    - name: watch_history
+      type: array
+      description: "Movie watch history"
+      element_schema:
+        - name: movie_id
+          type: objectid
+          reference_collection: movies
+          description: "Reference to watched movie"
+        
+        - name: watched_at
+          type: date
+          generator: date_between
+          start_date: "2024-01-01"
+          end_date: "2024-12-31"
+          description: "When movie was watched"
+        
+        - name: rating
+          type: integer
+          generator: random_int
+          min: 1
+          max: 10
+          description: "User's rating (1-10)"
+        
+        - name: is_completed
+          type: boolean
+          generator: choice
+          choices: [true, false]
+          description: "Whether user finished watching"
+    
+    - name: preferences
+      type: object
+      description: "User preferences"
+      fields:
+        - name: genres
+          type: array
+          element_type: string
+          generator: choice_array
+          choices: 
+            - "Action"
+            - "Drama"
+            - "Thriller"
+            - "Comedy"
+            - "Horror"
+            - "Sci-Fi"
+          cardinality: 3
+          description: "Preferred genres"
+        
+        - name: language
+          type: string
+          generator: choice
+          choices: ["en", "es", "fr", "de", "ja"]
+          description: "Preferred language"
+        
+        - name: notifications_enabled
+          type: boolean
+          generator: choice
+          choices: [true, false]
+          description: "Whether notifications are enabled"
+        
+        - name: theme
+          type: string
+          generator: choice
+          choices: ["light", "dark"]
+          description: "UI theme preference"
+    
+    - name: subscription
+      type: object
+      description: "Subscription information"
+      fields:
+        - name: plan
+          type: string
+          generator: choice
+          choices: ["free", "basic", "premium"]
+          description: "Subscription plan type"
+        
+        - name: active
+          type: boolean
+          generator: choice
+          choices: [true, false]
+          probability: 0.8
+          description: "Whether subscription is active"
+        
+        - name: expires_at
+          type: date
+          generator: date_between
+          start_date: "2024-01-01"
+          end_date: "2025-12-31"
+          description: "Subscription expiration date"
+    
+    - name: created_at
+      type: date
+      generator: date_between
+      start_date: "2020-01-01"
+      end_date: "2024-12-31"
+      required: true
+      description: "Account creation timestamp"
+    
+    - name: updated_at
+      type: date
+      generator: now
+      description: "Last profile update timestamp"
+
+  indexes:
+    - field: username
+      unique: true
+    - field: email
+      unique: true
+    - field: "profile.created_at"
+      unique: false
+    - field: "subscription.plan"
+      unique: false
+
+  validation:
+    - field: email
+      type: string
+      pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+      description: "Valid email format"
+    
+    - field: username
+      type: string
+      min_length: 3
+      max_length: 30
+      pattern: "^[a-zA-Z0-9_-]+$"
+      description: "Alphanumeric username"
+    
+    - field: "preferences.genres"
+      type: array
+      min_cardinality: 1
+      max_cardinality: 10
+      description: "At least 1, at most 10 genres"
+
+  masking:
+    enabled: true
+    fields:
+      - name: email
+        type: email
+        pattern: "^(.).*(@.*)$"
+        replacement: "$1***$2"
+      - name: password_hash
+        type: generic
+        replacement: "[HASHED]"
+
+  constraints:
+    - name: unique_username
+      type: unique
+      field: username
+      description: "Usernames must be unique"
+    
+    - name: unique_email
+      type: unique
+      field: email
+      description: "Emails must be unique"
+    
+    - name: valid_plan
+      type: check
+      condition: "subscription.plan in ['free', 'basic', 'premium']"
+      description: "Subscription plan must be valid"
+
+  relationships:
+    - collection: movies
+      field: favorite_movies
+      type: one_to_many
+      description: "Users have many favorite movies"
+    
+    - collection: comments
+      field: user_id
+      type: one_to_many
+      description: "Users have many comments"

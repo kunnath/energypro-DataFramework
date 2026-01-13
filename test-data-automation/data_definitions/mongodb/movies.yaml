@@ -1,0 +1,245 @@
+apiVersion: data.automation/v1
+kind: MongoDataDefinition
+metadata:
+  name: movies
+  database: sample_mflix
+  version: v1.0.0
+  description: |
+    Movie documents for sample_mflix database.
+    Realistic movie data including title, year, ratings, cast, and metadata.
+
+spec:
+  adapter: mongodb
+  collection: movies
+  
+  volume:
+    count: 100
+    description: "Generate 100 test movies"
+  
+  fields:
+    - name: _id
+      type: objectid
+      generator: objectid
+      description: "MongoDB document ID"
+    
+    - name: title
+      type: string
+      generator: movie_title
+      required: true
+      example: "The Godfather"
+    
+    - name: year
+      type: integer
+      generator: year
+      min: 1900
+      max: 2024
+      description: "Release year"
+    
+    - name: rated
+      type: string
+      generator: choice
+      choices: ["G", "PG", "PG-13", "R", "NC-17", "Not Rated"]
+      description: "MPAA rating"
+    
+    - name: runtime
+      type: integer
+      generator: random_int
+      min: 80
+      max: 240
+      description: "Runtime in minutes"
+      unit: "minutes"
+    
+    - name: genres
+      type: array
+      element_type: string
+      generator: choice_array
+      choices: 
+        - "Action"
+        - "Adventure"
+        - "Comedy"
+        - "Crime"
+        - "Drama"
+        - "Fantasy"
+        - "Horror"
+        - "Thriller"
+        - "Romance"
+        - "Sci-Fi"
+        - "Animation"
+        - "Documentary"
+      cardinality: 2
+      description: "Movie genres"
+    
+    - name: director
+      type: string
+      generator: name
+      required: true
+      description: "Director name"
+    
+    - name: writers
+      type: array
+      element_type: string
+      generator: name_array
+      cardinality: 3
+      description: "Screenplay/story writers"
+    
+    - name: cast
+      type: array
+      element_type: string
+      generator: name_array
+      cardinality: 5
+      description: "Cast members"
+    
+    - name: plot
+      type: string
+      generator: text
+      length: 200
+      required: true
+      description: "Brief plot summary"
+    
+    - name: fullplot
+      type: string
+      generator: text
+      length: 500
+      description: "Full plot description"
+    
+    - name: languages
+      type: array
+      element_type: string
+      generator: choice_array
+      choices: ["English", "Spanish", "French", "German", "Japanese", "Mandarin"]
+      cardinality: 1
+      description: "Languages in movie"
+    
+    - name: countries
+      type: array
+      element_type: string
+      generator: choice_array
+      choices: ["USA", "UK", "France", "Germany", "Japan", "India", "China"]
+      cardinality: 1
+      description: "Production countries"
+    
+    - name: type
+      type: string
+      generator: constant
+      value: "movie"
+      description: "Document type (always 'movie')"
+    
+    - name: released
+      type: date
+      generator: date_between
+      start_date: "1900-01-01"
+      end_date: "2024-12-31"
+      description: "Release date"
+    
+    - name: imdb
+      type: object
+      required: true
+      description: "IMDB metadata"
+      fields:
+        - name: rating
+          type: float
+          generator: random_float
+          min: 1.0
+          max: 10.0
+          precision: 1
+          description: "IMDB rating"
+        
+        - name: votes
+          type: integer
+          generator: random_int
+          min: 1000
+          max: 2000000
+          description: "Number of IMDB votes"
+        
+        - name: id
+          type: integer
+          generator: random_int
+          min: 100000
+          max: 10000000
+          description: "IMDB ID"
+    
+    - name: tomatoes
+      type: object
+      description: "Rotten Tomatoes metadata"
+      fields:
+        - name: viewer
+          type: object
+          fields:
+            - name: rating
+              type: float
+              generator: random_float
+              min: 1.0
+              max: 10.0
+              precision: 1
+            
+            - name: numReviews
+              type: integer
+              generator: random_int
+              min: 10
+              max: 5000
+        
+        - name: lastUpdated
+          type: date
+          generator: date_between
+          start_date: "2024-01-01"
+          end_date: "2024-12-31"
+    
+    - name: awards
+      type: object
+      description: "Award information"
+      fields:
+        - name: wins
+          type: integer
+          generator: random_int
+          min: 0
+          max: 30
+        
+        - name: nominations
+          type: integer
+          generator: random_int
+          min: 0
+          max: 100
+    
+    - name: poster
+      type: string
+      generator: url
+      description: "Poster image URL"
+    
+    - name: metacritic
+      type: integer
+      generator: random_int
+      min: 0
+      max: 100
+      description: "Metacritic score"
+
+  indexes:
+    - field: title
+      unique: false
+    - field: year
+      unique: false
+    - field: "imdb.rating"
+      unique: false
+    - field: genres
+      unique: false
+
+  validation:
+    - field: year
+      type: integer
+      min: 1800
+      max: 2030
+    - field: runtime
+      type: integer
+      min: 0
+      max: 500
+    - field: imdb.rating
+      type: float
+      min: 0.0
+      max: 10.0
+
+  masking:
+    enabled: false
+    fields: []
+
+  constraints:
+    check_duplicates: title
+    description: "Ensure unique movie titles in test data"
